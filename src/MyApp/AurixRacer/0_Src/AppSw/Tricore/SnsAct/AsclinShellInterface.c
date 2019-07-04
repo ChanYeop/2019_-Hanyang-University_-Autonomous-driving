@@ -37,12 +37,25 @@ typedef struct{
 	boolean enable;
 	sint32	period_ms;
 } linescan_t;
+
+typedef struct{
+	boolean enable;
+	sint32 period_ms;
+} disscan_t;
+
+typedef struct{
+	boolean enable;
+	sint32 period_ms;
+} encscan_t;
 /******************************************************************************/
 /*------------------------------Global variables------------------------------*/
 /******************************************************************************/
 
 App_AsclinShellInterface g_AsclinShellInterface; /**< \brief Demo information */
 linescan_t	g_LineScan = {FALSE, 1000};
+disscan_t g_DisScan = {FALSE, 1000};
+encscan_t g_EncScan = {FALSE, 1000};
+
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
@@ -59,7 +72,9 @@ boolean AppShell_linescan0(pchar args, void *data, IfxStdIf_DPipe *io);
 boolean AppShell_linescan1(pchar args, void *data, IfxStdIf_DPipe *io);
 boolean AppShell_monlinescan(pchar args, void *data, IfxStdIf_DPipe *io);
 boolean AppShell_vadcbg1(pchar args, void *data, IfxStdIf_DPipe *io);
+boolean AppShell_mondis(pchar args, void *data, IfxStdIf_DPipe *io);
 boolean AppShell_enc(pchar args, void *data, IfxStdIf_DPipe *io);
+boolean AppShell_monenc(pchar args, void *data, IfxStdIf_DPipe *io);
 boolean AppShell_port00_0(pchar args, void *data, IfxStdIf_DPipe *io);
 boolean AppShell_port00_1(pchar args, void *data, IfxStdIf_DPipe *io);
 boolean AppShell_info(pchar args, void *data, IfxStdIf_DPipe *io);
@@ -98,7 +113,9 @@ const Ifx_Shell_Command AppShell_commands[] = {
     {"ls1", "      : LineScan1", &g_AsclinShellInterface,       &AppShell_linescan1,    },
     {"mls", "      : Monitoring LineScan", &g_AsclinShellInterface,       &AppShell_monlinescan,    },
     {"vadc", "     : Vadc Backgound 1", &g_AsclinShellInterface,       &AppShell_vadcbg1,    },
+	{"mdis", "     : Monitoring Distance", &g_AsclinShellInterface,       &AppShell_mondis,    },
     {"enc", "      : Encoder", &g_AsclinShellInterface,       &AppShell_enc,    },
+	{"menc", "     : Monitoring Encoder", &g_AsclinShellInterface,       &AppShell_monenc,    },
     {"p00_0", "    : Port00_0", &g_AsclinShellInterface,       &AppShell_port00_0,    },
     {"p00_1", "    : Port00_1", &g_AsclinShellInterface,       &AppShell_port00_1,    },
     {"info",   "     : Show the welcome screen",   &g_AsclinShellInterface,       &AppShell_info,      },
@@ -120,7 +137,9 @@ const Ifx_Shell_Command AppShell_commands[] = {
     {"ls1", "      : LineScan1", &g_AsclinShellInterface,       &AppShell_linescan1,    },
     {"mls", "      : Monitoring LineScan", &g_AsclinShellInterface,       &AppShell_monlinescan,    },
     {"vadc", "     : Vadc Backgound 1", &g_AsclinShellInterface,       &AppShell_vadcbg1,    },
+	{"mdis", "     : Monitoring Distance", &g_AsclinShellInterface,       &AppShell_mondis,    },
     {"enc", "      : Encoder", &g_AsclinShellInterface,       &AppShell_enc,    },
+	{"menc", "     : Monitoring Encoder", &g_AsclinShellInterface,       &AppShell_monenc,    },
     {"p00_0", "    : Port00_0", &g_AsclinShellInterface,       &AppShell_port00_0,    },
     {"p00_1", "    : Port00_1", &g_AsclinShellInterface,       &AppShell_port00_1,    },
     {"info",   "     : Show the welcome screen",   &g_AsclinShellInterface,       &AppShell_info,      },
@@ -465,6 +484,28 @@ boolean AppShell_linescan1(pchar args, void *data, IfxStdIf_DPipe *io){
     return TRUE;
 }
 
+boolean AppShell_mondis(pchar args, void *data, IfxStdIf_DPipe *io)
+{
+	sint32 period_ms;
+	if (Ifx_Shell_matchToken(&args, "?") != FALSE)
+    {
+        IfxStdIf_DPipe_print(io, "  Syntax     : mdis period_ms"ENDL);
+    }
+    else
+    {
+    	if(Ifx_Shell_parseSInt32(&args, &period_ms) != FALSE){
+    		g_DisScan.period_ms = period_ms;
+    		g_DisScan.enable = TRUE;
+    	}else
+    	{
+    		g_DisScan.enable = FALSE;
+    	}
+    	IfxStdIf_DPipe_print(io, "  mdis: %4d "ENDL, g_DisScan.period_ms);
+    }
+
+    return TRUE;
+}
+
 boolean AppShell_vadcbg1(pchar args, void *data, IfxStdIf_DPipe *io){
 	if (Ifx_Shell_matchToken(&args, "?") != FALSE)
     {
@@ -473,14 +514,33 @@ boolean AppShell_vadcbg1(pchar args, void *data, IfxStdIf_DPipe *io){
     else
     {
     	IfxStdIf_DPipe_print(io, "  Vadc ");
-    	IfxStdIf_DPipe_print(io, "  Ch0: %4.2f,",IR_getUsrAdcChn0());
-    	IfxStdIf_DPipe_print(io, "  Ch1: %4.2f,",IR_getUsrAdcChn1());
-    	IfxStdIf_DPipe_print(io, "  Ch2: %4.2f,",IR_getUsrAdcChn2());
-    	IfxStdIf_DPipe_print(io, "  Ch3: %4.2f,"ENDL,IR_getUsrAdcChn3());
+    	IfxStdIf_DPipe_print(io, "  Ch0: %4.2f,", IR_getUsrAdcChn0());
+    	IfxStdIf_DPipe_print(io, "  Ch1: %4.2f"ENDL, IR_getUsrAdcChn1());
     }
     return TRUE;
 }
 
+boolean AppShell_monenc(pchar args, void *data, IfxStdIf_DPipe *io)
+{
+	sint32 period_ms;
+	if (Ifx_Shell_matchToken(&args, "?") != FALSE)
+    {
+        IfxStdIf_DPipe_print(io, "  Syntax     : menc period_ms"ENDL);
+    }
+    else
+    {
+    	if(Ifx_Shell_parseSInt32(&args, &period_ms) != FALSE){
+    		g_EncScan.period_ms = period_ms;
+    		g_EncScan.enable = TRUE;
+    	}else
+    	{
+    		g_EncScan.enable = FALSE;
+    	}
+    	IfxStdIf_DPipe_print(io, "  menc: %4d "ENDL, g_EncScan.period_ms);
+    }
+
+    return TRUE;
+}
 
 boolean AppShell_enc(pchar args, void *data, IfxStdIf_DPipe *io)
 {
@@ -491,7 +551,7 @@ boolean AppShell_enc(pchar args, void *data, IfxStdIf_DPipe *io)
     else
     {
     	IfxStdIf_DPipe_print(io, "  Encoder speed: %5d, position: %4d, direction: %1d "ENDL,
-    			IR_getEncSpeed(), IR_getEncPosition(), IR_getEncDirection());
+    			(sint32)IR_getEncSpeed(), (sint32)IR_getEncPosition(), IR_getEncDirection());
     }
 
     return TRUE;
@@ -721,11 +781,41 @@ void AsclinShellInterface_runLineScan(void)
 	{
 		cnt--;
 		if(cnt < 0){
-			cnt = (sint32) g_LineScan.period_ms/10;
+			cnt = (sint32) g_LineScan.period_ms/20;
 
-			for(i = 0; i<128; i++){
-			IfxStdIf_DPipe_print(&g_AsclinShellInterface.stdIf.asc, "%5d,%5d"ENDL,IR_LineScan.adcResult[0][i], IR_LineScan.adcResult[1][i]);
+			for(i = 0; i<128 * 2; i++){
+			IfxStdIf_DPipe_print(&g_AsclinShellInterface.stdIf.asc, "%5d,%5d"ENDL,
+					(i < 128) ? IR_LineScan.adcResult[0][i] : IR_LineScan.adcResult[1][i - 128],
+							(i < 128) ? IR_LineScan.line[0][i] : IR_LineScan.line[1][i - 128]);
 			}
+		}
+	}
+}
+
+void AsclinShellInterface_runDisScan(void)
+{
+	static sint32 cnt;
+
+	if(g_DisScan.enable == TRUE)
+	{
+		cnt--;
+		if(cnt < 0){
+			cnt = (sint32) g_DisScan.period_ms/20;
+			IfxStdIf_DPipe_print(&g_AsclinShellInterface.stdIf.asc, "%5.2f,%5.2f"ENDL, IR_Distance[0], IR_Distance[1]);
+		}
+	}
+}
+
+void AsclinShellInterface_runEncScan(void)
+{
+	static sint32 cnt;
+
+	if(g_EncScan.enable == TRUE)
+	{
+		cnt--;
+		if(cnt < 0){
+			cnt = (sint32) g_EncScan.period_ms/20;
+			IfxStdIf_DPipe_print(&g_AsclinShellInterface.stdIf.asc, "%5d,%4d,%1d"ENDL, (sint32)IR_getEncSpeed(), (sint32)IR_getEncPosition(), IR_getEncDirection());
 		}
 	}
 }

@@ -57,6 +57,7 @@ void appTaskfu_10ms(void)
 		BasicPort_run();
 		BasicGtmTom_run();
 		BasicVadcBgScan_run();
+		V2Distance();
 
 		if(IR_Ctrl.basicTest == FALSE){
 			#if CODE == CODE_HAND
@@ -67,7 +68,10 @@ void appTaskfu_10ms(void)
 
 			#endif
 		}
+
 		AsclinShellInterface_runLineScan();
+		AsclinShellInterface_runDisScan();
+		AsclinShellInterface_runEncScan();
 	}
 
 }

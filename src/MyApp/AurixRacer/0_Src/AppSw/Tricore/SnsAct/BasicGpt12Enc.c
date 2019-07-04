@@ -117,7 +117,7 @@ void BasicGpt12Enc_init(void)
         /* Test implementation with T2 as core */
         config.base.offset                    = 100;
         config.base.reversed                  = FALSE;
-        config.base.resolution                = 32;// 2048;
+        config.base.resolution                = 360;// 2048;
         config.base.periodPerRotation         = 1;
         config.base.resolutionFactor          = IfxStdIf_Pos_ResolutionFactor_fourFold;
         config.base.updatePeriod              = 1.0e-3; //100e-6;
@@ -128,8 +128,8 @@ void BasicGpt12Enc_init(void)
         config.zeroIsrProvider                = ISR_PROVIDER(INTERRUPT_INCRINC_ZERO);
         config.pinA                           = &IfxGpt120_T2INA_P00_7_IN;
         config.pinB                           = &IfxGpt120_T2EUDA_P00_8_IN;
-        config.pinZ                           = &IfxGpt120_T4EUDA_P00_9_IN;
-        config.pinMode                        = IfxPort_InputMode_noPullDevice;
+        config.pinZ                           = (IfxGpt12_TxIn_In *)&IfxGpt120_T4EUDA_P00_9_IN;
+        config.pinMode                        = IfxPort_InputMode_pullUp;
 
         config.base.speedFilterEnabled        = TRUE;
         config.base.speedFilerCutOffFrequency = config.base.maxSpeed / 2 * IFX_PI * 10;
